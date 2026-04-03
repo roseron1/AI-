@@ -190,4 +190,40 @@ router.delete('/config/:key', (req, res) => {
   }
 })
 
+router.post('/ai/chat', async (req, res) => {
+  try {
+    const { messages, model = 'gpt-3.5-turbo' } = req.body
+    
+    const apiKey = process.env.OPENAI_API_KEY
+    if (!apiKey) {
+      return res.status(500).json({ code: 50001, message: 'AI API Key 未配置' })
+    }
+    
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: 0.7
+      })
+    })
+    
+    if (!response.ok) {
+      const error = await response.text()
+      console.error('[API] AI 请求失败:', error)
+      return res.status(500).json({ code: 50002, message: 'AI 请求失败' })
+    }
+    
+    const data = await response.json()
+    res.json({ code: 10000, message: 'success', data: data })
+  } catch (error) {
+    console.error('[API] AI 接口异常:', error)
+    res.status(500).json({ code: 50000, message: error.message })
+  }
+})
+
 module.exports = router

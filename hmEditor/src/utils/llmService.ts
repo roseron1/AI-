@@ -19,13 +19,15 @@ export interface LLMConfig {
   apiUrl: string
   model: string
   temperature: number
+  useBackendProxy: boolean
 }
 
 const DEFAULT_CONFIG: LLMConfig = {
   apiKey: '',
   apiUrl: 'https://api.deepseek.com/v1/chat/completions',
   model: 'deepseek-chat',
-  temperature: 0.3
+  temperature: 0.3,
+  useBackendProxy: true
 }
 
 const DOC_PROMPT_CONFIG: Record<string, {
@@ -388,6 +390,7 @@ export const generateMedicalRecord = async (
   config: Partial<LLMConfig> = {}
 ): Promise<MedicalRecordResult> => {
   const finalConfig = { ...DEFAULT_CONFIG, ...config }
+  const useBackendProxy = finalConfig.useBackendProxy !== false
   
   console.log('[LLM] 配置检查:')
   console.log('[LLM] - apiKey:', finalConfig.apiKey ? `已配置 (${finalConfig.apiKey.substring(0, 8)}...)` : '未配置')
@@ -395,8 +398,9 @@ export const generateMedicalRecord = async (
   console.log('[LLM] - model:', finalConfig.model)
   console.log('[LLM] - docType:', docType)
   console.log('[LLM] - patientInfo:', patientInfo)
+  console.log('[LLM] - useBackendProxy:', useBackendProxy)
   
-  if (!finalConfig.apiKey) {
+  if (!finalConfig.apiKey && !useBackendProxy) {
     console.warn('[LLM] API Key 未配置，使用模拟数据')
     return generateMockResult(clinicalInput, docType, patientInfo)
   }
@@ -407,8 +411,25 @@ export const generateMedicalRecord = async (
   console.log('[LLM] System Prompt 长度:', systemPrompt.length)
   console.log('[LLM] User Input:', clinicalInput)
 
-  try {
-    const response = await fetch(finalConfig.apiUrl, {
+  let response: Response
+  
+  if (useBackendProxy) {
+    console.log('[LLM] 使用后端代理 API')
+    response = await fetch('/api/ai/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: finalConfig.model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `临床描述：${clinicalInput}` }
+        ]
+      })
+    })
+  } else {
+    response = await fetch(finalConfig.apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -423,6 +444,7 @@ export const generateMedicalRecord = async (
         temperature: finalConfig.temperature
       })
     })
+  }
 
     if (!response.ok) {
       const errorText = await response.text()
@@ -432,11 +454,21 @@ export const generateMedicalRecord = async (
 
     const data = await response.json()
     
-    if (!data.choices || data.choices.length === 0) {
+    let aiResponse: any = data
+    
+    if (data.code && data.code !== 10000) {
+      throw new Error(data.message || 'API 返回错误')
+    }
+    
+    if (data.data) {
+      aiResponse = data.data
+    }
+    
+    if (!aiResponse.choices || aiResponse.choices.length === 0) {
       throw new Error('API 无效响应')
     }
 
-    let resultText = data.choices[0].message.content.trim()
+    let resultText = aiResponse.choices[0].message.content.trim()
     console.log('[LLM] 原始响应:', resultText.substring(0, 500))
     
     resultText = resultText
