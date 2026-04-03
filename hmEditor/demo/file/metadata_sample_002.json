@@ -1,0 +1,8 @@
+{
+    "code": "DE02.01.005.01",
+    "description": "患者出生当日的公元纪年日期的完整描述",
+    "format": "D8",
+    "name": "出生日期",
+    "nodeName": "时间",
+    "type": "D"
+}

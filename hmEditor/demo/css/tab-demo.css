@@ -1,0 +1,2822 @@
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+/* 等宽数字工具类 - 用于化验单指标垂直对齐 */
+.tabular-nums {
+    font-variant-numeric: tabular-nums;
+}
+
+/* AI 文本注入确认动画 */
+@keyframes ai-inject-fade {
+    0% {
+        background-color: rgba(16, 185, 129, 0.2);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+.ai-injected-text {
+    border-radius: 2px;
+    animation: ai-inject-fade 3s ease-out forwards;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+    position: relative;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+/* 沉浸式模式 */
+.container.focus-mode .left-panel {
+    transform: translateX(-100%);
+    width: 0;
+    min-width: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.container.focus-mode .btn-panel {
+    transform: translateY(-100%);
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+
+.container.focus-mode .main-content {
+    margin-left: 0;
+}
+
+.container.focus-mode .main-page {
+    padding-top: 0;
+}
+
+.container.focus-mode .toolbar-toggle-btn {
+    display: none;
+}
+
+.focus-mode-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.focus-mode-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.focus-mode-btn.active {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.focus-mode-btn i {
+    font-size: 14px;
+}
+
+/* 未保存确认对话框 */
+.unsaved-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.unsaved-modal {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 420px;
+    width: 90%;
+    animation: slideIn 0.3s ease;
+    overflow: hidden;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.unsaved-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.unsaved-modal-header i {
+    font-size: 24px;
+    color: #f59e0b;
+}
+
+.unsaved-modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.unsaved-modal-body {
+    padding: 20px 24px;
+}
+
+.unsaved-modal-message {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #475569;
+}
+
+.unsaved-modal-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 12px 16px;
+    background-color: #fef3c7;
+    border-radius: 8px;
+    border-left: 4px solid #f59e0b;
+}
+
+.unsaved-modal-warning i {
+    color: #d97706;
+    font-size: 16px;
+    margin-top: 2px;
+}
+
+.unsaved-modal-warning span {
+    font-size: 13px;
+    color: #92400e;
+    line-height: 1.5;
+}
+
+.unsaved-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px 20px;
+    background-color: #f8fafc;
+}
+
+.unsaved-modal-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.unsaved-modal-btn-cancel {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.unsaved-modal-btn-cancel:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.unsaved-modal-btn-cancel:focus {
+    outline: 3px solid rgba(59, 130, 246, 0.3);
+    outline-offset: 2px;
+}
+
+.unsaved-modal-btn-discard {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.unsaved-modal-btn-discard:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.unsaved-modal-btn-discard:focus {
+    outline: 3px solid rgba(239, 68, 68, 0.3);
+    outline-offset: 2px;
+}
+
+/* 左侧面板 */
+.left-panel {
+    width: 300px;
+    height: 100%;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 100;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+    backdrop-filter: blur(12px);
+    border-right: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: width 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
+}
+
+.toggle-left-panel-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    position: absolute;
+    right: 5px;
+    top: 20px;
+    z-index: 10;
+    color: #4c92f8;
+}
+
+.left-panel.collapsed {
+    width: 20px;
+    /* 收缩后的宽度 */
+    min-width: 20px;
+    transition: width 0.2s;
+    overflow: inherit;
+
+    .toggle-left-panel-btn {
+        right: -4px;
+    }
+
+    .panel-header {
+        padding: 0;
+    }
+
+    .toolbar-title {
+        display: none;
+    }
+
+    .panel-content {
+        display: none;
+    }
+}
+
+.left-panel.collapsed~.main-content {
+    margin-left: 15px;
+}
+
+/* 面板头部 */
+.panel-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%);
+    flex-shrink: 0;
+}
+
+/* 面板副标题 */
+.panel-subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin-top: 8px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding-left: 52px;
+}
+
+/* 面板内容区 */
+.panel-content {
+    flex: 1;
+    padding: 12px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 主内容区域 */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    padding: 5px 15px 5px 15px;
+    box-sizing: border-box;
+    margin-left: 300px;
+    transition: margin-left 0.2s;
+}
+
+/* 患者信息横幅 */
+.patient-banner {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    height: 40px;
+    padding: 0 16px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    margin-bottom: 6px;
+    flex-shrink: 0;
+}
+
+.patient-banner-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.patient-banner-label {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.patient-banner-value {
+    font-size: 13px;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.patient-banner-allergy {
+    background-color: #fee2e2;
+    padding: 4px 12px;
+    border-radius: 4px;
+    margin-left: auto;
+}
+
+.patient-banner-allergy .patient-banner-label {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.patient-banner-allergy .patient-banner-value {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.main-page {
+    overflow-x: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding-right: 20px;
+    position: relative;
+}
+
+/* 顶部工具栏面板 */
+.btn-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    position: relative;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    padding: 6px 15px 10px 15px;
+    margin-bottom: 6px;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    min-width: 500px;
+    transition: transform 0.3s ease, max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease, margin 0.3s ease;
+}
+
+/* 工具栏切换按钮 */
+.toolbar-toggle-btn {
+    display: none;
+    position: absolute;
+    /* width: 80px; */
+    /* background: #FFF;
+    box-shadow: 0 1px 4px rgba(43, 106, 238, .5); */
+    border-radius: 8px;
+    height: 10px;
+    line-height: 10px;
+    left: 5px;
+    /* top: 10px; */
+    cursor: pointer;
+    z-index: 60;
+}
+
+.toolbar-toggle-btn i {
+    color: #2563eb;
+    /* margin-left: 45%;
+    margin-top: -4px; */
+}
+
+/* 工具栏标题（在左侧面板中） */
+.toolbar-title {
+    display: flex;
+    align-items: center;
+}
+
+.title-icon {
+    font-size: 24px;
+    margin-right: 12px;
+    margin-bottom: -8px;
+}
+
+.title-icon img {
+    width: 40px;
+    height: 40px;
+}
+
+.title-text {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.left-btn-container {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+}
+
+.center-btn-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.center-btn-container {
+    display: flex;
+    flex: 1 1 0;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 0;
+    max-height: 88px;
+    /* 2行高度，假设每行44px，可根据实际调整 */
+    overflow: hidden;
+    transition: max-height 0.3s;
+}
+
+.center-btn-container.expanded {
+    max-height: none;
+}
+
+.center-btn-toggle {
+    display: none;
+    position: absolute;
+    width: 80px;
+    background: #FFF;
+    -webkit-box-shadow:  0 1px 4px rgba(43, 106, 238, .5);
+    box-shadow: 0 1px 4px rgba(43, 106, 238, .5);
+    border-radius: 8px;
+    height: 10px;
+    line-height: 10px;
+    right: 50%;
+    bottom: -10px;
+    cursor: pointer;
+}
+
+.center-btn-toggle i {
+    color: #2563eb;
+    margin-left: 45%;
+    margin-top: -4px;
+}
+
+.center-btn-wrapper.show-toggle .center-btn-toggle {
+    display: block;
+}
+
+.right-btn-container {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+}
+
+/* 右侧容器标题 */
+.right-container-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+    width: 100%;
+    justify-content: center;
+}
+
+.title-icon-small {
+    font-size: 14px;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.right-btn-container::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.6) 100%);
+    border-radius: 10px;
+    z-index: -1;
+}
+
+/* 右侧按钮容器内的按钮样式 */
+.right-btn-container button {
+    width: 120px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.right-btn-container button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.5s;
+}
+
+.right-btn-container button:hover::before {
+    left: 100%;
+}
+
+.right-btn-container button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.right-btn-container button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* 基础按钮样式 */
+.btn-panel button {
+    padding: 8px 16px;
+    cursor: pointer;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    color: #475569;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.btn-panel button:hover {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+}
+
+.btn-panel button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* 主要按钮 */
+.btn-panel button.btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-color: #2563eb;
+    color: white;
+}
+
+.btn-panel button.btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    border-color: #1d4ed8;
+}
+
+/* 成功按钮 */
+.btn-panel button.btn-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-color: #059669;
+    color: white;
+}
+
+.btn-panel button.btn-success:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    border-color: #047857;
+}
+
+/* 危险按钮 */
+.btn-panel button.btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    border-color: #dc2626;
+    color: white;
+}
+
+.btn-panel button.btn-danger:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    border-color: #b91c1c;
+}
+
+.btn-panel .separator {
+    height: 1px;
+    background-color: #ccc;
+    margin: 15px 0;
+    border: none;
+}
+
+/* 标签页和编辑器容器 */
+.tab-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 200px);
+    /* 减去工具栏高度 */
+    overflow: hidden;
+    box-sizing: border-box;
+    transition: margin-right 0.3s ease;
+    /* margin-right: 20px; 默认为日志面板的宽度 */
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(10px);
+    min-width: 500px;
+}
+
+.tab-header {
+    background: linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.9) 100%);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    padding: 12px 16px 0 16px;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    min-height: 50px;
+    box-sizing: border-box;
+    border-radius: 12px 12px 0 0;
+}
+
+.tab-contents {
+    flex: 1;
+    position: relative;
+    height: calc(100% - 45px);
+    /* 减去标签头的高度 */
+    overflow: hidden;
+}
+
+.tab-content {
+    width: 100%;
+    height: 100%;
+    display: none;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.editor-container {
+    width: 100%;
+    height: 100%;
+}
+
+/* 标签样式 */
+.tab-item {
+    position: relative;
+    padding: 10px 32px 10px 16px;
+    /* 右侧留出关闭按钮空间 */
+    margin-right: 8px;
+    cursor: pointer;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    background: linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.8) 100%);
+    display: inline-block;
+    user-select: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.tab-item:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%);
+    border-color: rgba(203, 213, 225, 0.8);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tab-item.active {
+    background: linear-gradient(135deg, #ffffff 0%, rgba(248, 250, 252, 0.9) 100%);
+    border-color: rgba(203, 213, 225, 0.8);
+    border-bottom: 1px solid #ffffff;
+    margin-bottom: -1px;
+    font-weight: 600;
+    color: #334155;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.tab-close-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    width: 18px;
+    height: 18px;
+    line-height: 16px;
+    text-align: center;
+    border-radius: 50%;
+    background: rgba(248, 250, 252, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    color: #64748b;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab-item:hover .tab-close-btn {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+}
+
+.tab-close-btn:hover {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    border-color: #dc2626;
+    color: #ffffff;
+    transform: translateY(-50%) scale(1.1);
+}
+
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px
+}
+
+::-webkit-scrollbar-track {
+    background: 0 0
+}
+
+::-webkit-scrollbar-thumb {
+    background: #ddd;
+    border-radius: 5px
+}
+
+/* 通用弹窗及输入对话框样式 */
+.dialogBox {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 1000;
+    text-align: center;
+    min-width: 350px;
+}
+
+.dialogBox h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 16px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    text-align: left;
+}
+
+.dialogBox textarea {
+    width: 100%;
+    height: 200px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.dialogBox button {
+    margin: 0 5px;
+    padding: 6px 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.dialogBox button:hover {
+    background-color: #e0e0e0;
+}
+
+.dialogBox .help-text {
+    font-size: 12px;
+    color: #666;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+.dialogBox .help-text .token-link {
+    color: #1890ff;
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 1px solid #1890ff;
+    transition: all 0.3s ease;
+}
+
+.dialogBox .help-text .token-link:hover {
+    color: #40a9ff;
+    border-bottom-color: #40a9ff;
+}
+
+.dialogBox .quick-links {
+    margin-bottom: 15px;
+    text-align: left;
+    font-size: 13px;
+}
+
+.dialogBox .quick-link,
+.dialogBox .quick-link-template {
+    display: inline-block;
+    margin: 0 10px 0 0;
+    color: #1976d2;
+    text-decoration: underline;
+    font-size: 13px;
+    transition: color 0.2s;
+}
+
+.dialogBox .quick-link:hover,
+.dialogBox .quick-link-template:hover {
+    color: #0d47a1;
+    cursor: pointer;
+}
+
+.documentInfo .option-row, .insertMetaDataInfo .option-row {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.documentInfo .checkbox-label,.insertMetaDataInfo .checkbox-label {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: #333;
+    cursor: pointer;
+}
+
+.documentInfo .checkbox-label input[type="checkbox"],.insertMetaDataInfo .checkbox-label input[type="checkbox"] {
+    margin-right: 6px;
+}
+
+/* 设置数据对话框样式 */
+.dataInputDialog {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 1000;
+    text-align: center;
+    min-width: 350px;
+}
+
+.dataInputDialog h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 16px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    text-align: left;
+}
+
+.dataInputDialog textarea {
+    width: 100%;
+    height: 200px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.dataInputDialog button {
+    margin: 0 5px;
+    padding: 6px 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.dataInputDialog button:hover {
+    background-color: #e0e0e0;
+}
+
+/* 获取HTML文本对话框样式 */
+.getHtmlDialog {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 1000;
+    text-align: center;
+    min-width: 350px;
+}
+
+.getHtmlDialog h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 16px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    text-align: left;
+}
+
+.getHtmlDialog textarea {
+    width: 100%;
+    height: 120px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.getHtmlDialog button {
+    margin: 0 5px;
+    padding: 6px 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.getHtmlDialog button:hover {
+    background-color: #e0e0e0;
+}
+
+.getHtmlDialog .help-text {
+    font-size: 12px;
+    color: #666;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+/* 获取修订记录对话框样式 */
+.getRevisionHistoryDialog {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 1000;
+    text-align: center;
+    min-width: 350px;
+}
+
+.getRevisionHistoryDialog h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 16px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    text-align: left;
+}
+
+.getRevisionHistoryDialog textarea {
+    width: 100%;
+    height: 120px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.getRevisionHistoryDialog button {
+    margin: 0 5px;
+    padding: 6px 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.getRevisionHistoryDialog button:hover {
+    background-color: #e0e0e0;
+}
+
+.getRevisionHistoryDialog .help-text {
+    font-size: 12px;
+    color: #666;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+/* 展示内容对话框样式 */
+.contentDisplayDialog {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 1000;
+    text-align: center;
+    min-width: 500px;
+    max-width: 80%;
+}
+
+.contentDisplayDialog h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 16px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    text-align: left;
+}
+
+.contentDisplayDialog textarea {
+    width: 100%;
+    height: 300px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    resize: vertical;
+    box-sizing: border-box;
+    background-color: #f9f9f9;
+    font-family: monospace;
+}
+
+.contentDisplayDialog button {
+    margin: 0 5px;
+    padding: 6px 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.contentDisplayDialog button:hover {
+    background-color: #e0e0e0;
+}
+
+/* 隐藏元素 */
+.hidden {
+    display: none;
+}
+
+
+
+/* 日志条目样式 */
+
+
+
+/* 插入文档弹框样式 */
+.insertDocDialog {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 1000;
+    text-align: center;
+    min-width: 350px;
+}
+
+.insertDocDialog h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 16px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    text-align: left;
+}
+
+.insertDocDialog textarea {
+    width: 100%;
+    height: 200px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.insertDocDialog button {
+    margin: 0 5px;
+    padding: 6px 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.insertDocDialog .input-group {
+    margin-bottom: 15px;
+}
+
+.insertDocDialog .input-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.insertDocDialog .input-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.insertDocDialog .input-group input:focus {
+    border-color: #4a90e2;
+    outline: none;
+}
+
+.insertDataAtCursorDialog {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 300px;
+}
+
+.insertDataAtCursorDialog h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.input-group {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: flex-start;
+}
+
+.input-group label {
+    width: 80px;
+    text-align: left;
+    margin-right: 10px;
+    padding-top: 5px;
+    flex-shrink: 0;
+}
+
+.input-group textarea,
+.input-group input {
+    flex: 1;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.input-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+
+
+/* 设置水印对话框样式 */
+.setWatermarkDialog {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 1000;
+    text-align: center;
+    min-width: 400px;
+}
+
+.setWatermarkDialog h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 16px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    text-align: left;
+}
+
+.setWatermarkDialog .input-group {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    text-align: left;
+    min-height: 35px;
+}
+
+.setWatermarkDialog .input-group label {
+    width: 80px;
+    margin-right: 10px;
+    color: #333;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.setWatermarkDialog .input-group input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.setWatermarkDialog .input-group input:focus {
+    border-color: #4a90e2;
+    outline: none;
+    box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
+}
+
+.setWatermarkDialog .input-group input[type="color"] {
+    width: 50px;
+    height: 35px;
+    padding: 2px;
+    cursor: pointer;
+}
+
+.setWatermarkDialog .input-group select {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 14px;
+    background-color: #fff;
+}
+
+.setWatermarkDialog .input-group select:focus {
+    border-color: #4a90e2;
+    outline: none;
+    box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
+}
+
+.setWatermarkDialog .input-group input[type="file"] {
+    flex: 1;
+    padding: 6px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 14px;
+    background-color: #fff;
+}
+
+.setWatermarkDialog .image-preview-container {
+    flex: 1;
+    border: 1px dashed #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fafafa;
+}
+
+.setWatermarkDialog .image-placeholder {
+    color: #999;
+    font-size: 14px;
+}
+
+.setWatermarkDialog #watermarkImagePreview {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.setWatermarkDialog .unit-text {
+    margin-left: 8px;
+    color: #666;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.setWatermarkDialog .checkbox-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.setWatermarkDialog .checkbox-label {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    margin: 0;
+    white-space: nowrap;
+    width: 100%;
+    min-width: 120px;
+}
+
+.setWatermarkDialog .checkbox-label input[type="checkbox"] {
+    margin-right: 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.setWatermarkDialog button {
+    margin: 0 5px;
+    padding: 8px 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 14px;
+}
+
+.setWatermarkDialog button:hover {
+    background-color: #e0e0e0;
+}
+
+.setWatermarkDialog .help-text {
+    font-size: 12px;
+    color: #666;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+.switch-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    margin-right: 12px;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider-circle {
+    position: absolute;
+    content: '';
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.switch-flag {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* 通用弹窗按钮样式 */
+.dialog-btn {
+    margin: 0 5px;
+    padding: 8px 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    color: #475569;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.dialog-btn:hover {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+}
+
+.dialog-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.dialog-btn.btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-color: #2563eb;
+    color: white;
+}
+
+.dialog-btn.btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    border-color: #1d4ed8;
+}
+
+.next-feature-btn {
+    background: #f4f4f4 !important;
+    color: #999 !important;
+    border: 1.5px dashed #bbb !important;
+    cursor: not-allowed !important;
+    position: relative;
+}
+
+.next-feature-btn:hover::after {
+    content: '请使用左侧AI病历';
+    position: absolute;
+    left: 50%;
+    top: -32px;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    z-index: 10;
+    opacity: 0.95;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* 主内容区宽度自适应 */
+body:not(.shrink-main) {
+    .btn-panel {
+        /* margin-right: 20px; */
+        transition: margin-right 0.3s;
+    }
+}
+
+body.shrink-main {
+    .btn-panel {
+        /* margin-right: 400px; */
+        transition: margin-right 0.3s;
+    }
+
+    .tab-container {
+        /* margin-right: 400px; */
+        transition: margin-right 0.3s;
+    }
+}
+
+body.smart-panel {
+    .btn-panel {
+        /* margin-right: 324px; */
+        transition: margin-right 0.3s;
+    }
+
+    .tab-container {
+        /* margin-right: 324px; */
+        transition: margin-right 0.3s;
+    }
+
+    .assistant-block {
+        width: 324px;
+    }
+}
+
+
+/* 全局滚动条美化 */
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px
+}
+
+::-webkit-scrollbar-track {
+    background: 0 0
+}
+
+::-webkit-scrollbar-thumb {
+    background: #ddd;
+    border-radius: 5px
+}
+
+/* HMEditor 右侧助手块唯一主样式定义 */
+.assistant-block {
+    /* position: fixed !important; */
+    top: 0;
+    right: 0 !important;
+    left: auto !important;
+    width: 400px;
+    height: 100vh;
+    z-index: 2500;
+    background: #f8f9fa;
+    border-left: 1px solid #e9ecef;
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+}
+
+.assistant-block.expanded {
+    /* 如有特殊样式可补充 */
+}
+
+.assistant-block .chat-settings-modal {
+    /* 如有特殊样式可补充 */
+}
+
+/* 竖直tab列 */
+.assistant-float-tab-col {
+    position: fixed;
+    right: 0;
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+    height: 100%;
+    padding-top: 5px;
+}
+
+.assistant-float-tab-btn {
+    width: 20px;
+    min-width: 20px;
+    max-width: 20px;
+    height: 70px;
+    background: #2563eb;
+    color: #fff;
+    border-radius: 8px 0 0 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    cursor: pointer;
+    box-shadow: -2px 2px 12px rgba(37, 99, 235, 0.08);
+    transition: background 0.2s;
+    border: none;
+    outline: none;
+    padding: 0 2px;
+    gap: 4px;
+}
+
+.assistant-float-tab-btn i {
+    font-size: 18px;
+}
+
+.assistant-float-tab-btn span {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0;
+    padding: 0;
+}
+
+.assistant-float-tab-btn.active {
+    background: #1d4ed8;
+    color: #fff;
+}
+
+.assistant-float-tab-btn:hover {
+    background: #1d4ed8;
+}
+
+
+.side-panel.collapsed {
+    right: -320px;
+    width: 30px;
+}
+
+.side-panel-tabs {
+    display: flex;
+    align-items: center;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    height: 48px;
+}
+
+.side-tab {
+    flex: 1;
+    border: none;
+    background: none;
+    font-size: 15px;
+    color: #64748b;
+    padding: 0 12px;
+    height: 100%;
+    cursor: pointer;
+    outline: none;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-bottom 0.2s;
+}
+
+.side-tab.active {
+    color: #2563eb;
+    border-bottom: 2.5px solid #2563eb;
+    background: #fff;
+}
+
+.side-panel-toggle {
+    width: 30px;
+    height: 100%;
+    border: none;
+    background: none;
+    font-size: 18px;
+    color: #64748b;
+    cursor: pointer;
+    outline: none;
+    transition: color 0.2s;
+}
+
+.side-panel-toggle:hover {
+    color: #2563eb;
+}
+
+.side-panel-content {
+    flex: 1;
+    position: relative;
+    height: calc(100% - 48px);
+}
+
+#logPanel,
+#chatPanel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+}
+
+#logPanel {
+    z-index: 1;
+}
+
+#chatPanel {
+    z-index: 2;
+}
+
+/* 左侧Tab切换 */
+.assistant-tabs {
+    width: 60px;
+    background: #343a40;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.assistant-tab {
+    width: 50px;
+    height: 50px;
+    margin: 5px 0;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #adb5bd;
+    transition: all 0.3s ease;
+    font-size: 12px;
+}
+
+.assistant-tab:hover {
+    background: #495057;
+    color: #fff;
+}
+
+.assistant-tab.active {
+    background: #007bff;
+    color: #fff;
+}
+
+.assistant-tab i {
+    font-size: 16px;
+    margin-bottom: 2px;
+}
+
+.assistant-tab span {
+    font-size: 10px;
+    line-height: 1;
+}
+
+/* 助手块内容 */
+.assistant-content {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* 顶部标题栏 */
+.assistant-header {
+    height: 50px;
+    background: #fff;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    flex-shrink: 0;
+}
+
+.assistant-title {
+    font-weight: 600;
+    color: #495057;
+    font-size: 14px;
+}
+
+.assistant-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.assistant-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #f8f9fa;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    transition: all 0.2s ease;
+}
+
+.assistant-btn:hover {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.assistant-btn i {
+    font-size: 12px;
+}
+
+/* 助手面板 */
+.assistant-panel {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column; 
+}
+.customPropertiesDialog{
+    width: 500px;
+    .switch{
+        margin-left:12px;
+    }
+}
+.focusElementDialog h3 {
+    font-size: 14px;
+}
+.focusElementDialog .input-group {
+    align-items: center;
+}
+.focusElementDialog .input-group label {
+    width: 140px;
+}
+.insertHtmlDialog .input-group label {
+    width: 140px;
+    text-align: right;
+}
+
+/* ========== 临床 AI 辅助面板样式 ========== */
+.clinical-ai-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: linear-gradient(135deg, #1a2535 0%, #1e2a38 100%);
+    color: #ecf0f1;
+    border-left: 1px solid #34495e;
+    box-shadow: inset 4px 0 8px rgba(0, 0, 0, 0.15);
+}
+
+.clinical-ai-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #2c4158, #2c3e50);
+    border-bottom: 1px solid #34495e;
+}
+
+.clinical-ai-header i {
+    font-size: 20px;
+    color: #3498db;
+}
+
+.clinical-ai-header span {
+    font-size: 16px;
+    font-weight: 600;
+    flex: 1;
+}
+
+.clinical-sync-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #1a5f7a 0%, #2980b9 100%);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clinical-sync-btn:hover {
+    background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+    transform: translateY(-1px);
+}
+
+.clinical-sync-btn.syncing {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.clinical-sync-btn.syncing i {
+    animation: spin 1s linear infinite;
+}
+
+.clinical-sync-btn.synced {
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+}
+
+.clinical-his-data {
+    background: linear-gradient(135deg, #1a252f 0%, #1c2833 100%);
+    border-bottom: 1px solid #34495e;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.clinical-his-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: rgba(52, 152, 219, 0.1);
+    border-bottom: 1px solid #34495e;
+    font-size: 13px;
+    font-weight: 600;
+    color: #3498db;
+}
+
+.clinical-his-header i {
+    font-size: 14px;
+}
+
+.clinical-his-patient-id {
+    margin-left: auto;
+    font-size: 11px;
+    color: #78909c;
+    font-weight: normal;
+}
+
+.clinical-his-content {
+    padding: 12px 16px;
+}
+
+.clinical-his-section {
+    margin-bottom: 12px;
+}
+
+.clinical-his-section:last-child {
+    margin-bottom: 0;
+}
+
+.clinical-his-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #9b59b6;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.clinical-his-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    margin-bottom: 3px;
+    background-color: #2c3e50;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.clinical-his-item-name {
+    color: #b0bec5;
+}
+
+.clinical-his-item-value {
+    font-weight: 600;
+}
+
+.clinical-his-item-value.high {
+    color: #e74c3c;
+}
+
+.clinical-his-item-value.low {
+    color: #f39c12;
+}
+
+.clinical-his-item-value.normal {
+    color: #27ae60;
+}
+
+.clinical-his-summary {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: rgba(231, 76, 60, 0.1);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+    border-radius: 6px;
+    font-size: 12px;
+    color: #e74c3c;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.clinical-his-imaging {
+    padding: 10px;
+    margin-top: 8px;
+    background-color: #2c3e50;
+    border-radius: 6px;
+    border-left: 3px solid #9b59b6;
+}
+
+.clinical-his-imaging-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #9b59b6;
+    margin-bottom: 6px;
+}
+
+.clinical-his-imaging-content {
+    font-size: 12px;
+    color: #b0bec5;
+    line-height: 1.5;
+}
+
+.clinical-context-info {
+    background: linear-gradient(135deg, #2d3a4a 0%, #263240 100%);
+    border-bottom: 1px solid #3d5a73;
+    padding: 12px 16px;
+    font-size: 12px;
+}
+
+.clinical-context-info .context-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #3498db;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.clinical-context-info .context-header i {
+    color: #3498db;
+}
+
+.clinical-context-info .context-item {
+    color: #b0bec5;
+    padding: 4px 0;
+    line-height: 1.5;
+}
+
+.clinical-context-info .context-label {
+    color: #78909c;
+    font-weight: 500;
+}
+
+.clinical-ai-body {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+}
+
+.clinical-ai-section {
+    margin-bottom: 20px;
+}
+
+.clinical-ai-section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #b0bec5;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #34495e;
+}
+
+.clinical-ai-section-title i {
+    color: #3498db;
+}
+
+.clinical-search-wrapper {
+    display: flex;
+    gap: 8px;
+}
+
+.clinical-search-input {
+    flex: 1;
+    padding: 10px 14px;
+    background-color: #243447;
+    border: 1px solid #34495e;
+    border-radius: 6px;
+    color: #ecf0f1;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.clinical-search-input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.clinical-search-input::placeholder {
+    color: #78909c;
+}
+
+.clinical-search-btn {
+    padding: 10px 14px;
+    background-color: #3498db;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clinical-search-btn:hover {
+    background-color: #2d8bb5;
+}
+
+.clinical-evidence-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.clinical-evidence-tag {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    background-color: #243447;
+    border: 1px solid #34495e;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clinical-evidence-tag:hover {
+    border-color: #3498db;
+    background-color: #2c4158;
+}
+
+.clinical-evidence-tag input[type="checkbox"] {
+    display: none;
+}
+
+.clinical-evidence-tag input[type="checkbox"]:checked + .clinical-tag-label {
+    color: #3498db;
+}
+
+.clinical-evidence-tag input[type="checkbox"]:checked ~ .clinical-tag-label::before {
+    content: '✓ ';
+    color: #27ae60;
+}
+
+.clinical-tag-label {
+    font-size: 13px;
+    color: #b0bec5;
+    transition: color 0.2s ease;
+}
+
+.clinical-soap-result {
+    background-color: #243447;
+    border: 1px solid #34495e;
+    border-radius: 8px;
+    padding: 16px;
+    min-height: 200px;
+    max-height: 300px;
+    overflow-y: auto;
+    font-variant-numeric: tabular-nums;
+}
+
+/* 拖拽功能样式 */
+.clinical-draggable-field {
+    position: relative;
+    cursor: grab;
+    transition: all 0.2s ease;
+}
+
+.clinical-draggable-field:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.clinical-draggable-field:hover .clinical-drag-handle {
+    opacity: 1;
+}
+
+.clinical-draggable-field.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.clinical-drag-handle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    font-size: 14px;
+    letter-spacing: -2px;
+    user-select: none;
+}
+
+.editor-drop-zone {
+    border: 2px dashed transparent;
+    transition: all 0.2s ease;
+    min-height: 50px;
+}
+
+.editor-drop-zone.drag-over {
+    border-color: #3498db;
+    background-color: rgba(52, 152, 219, 0.05);
+}
+
+.editor-drop-zone.drag-over::after {
+    content: '释放以插入文本';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #3498db;
+    font-size: 14px;
+    font-weight: 600;
+    pointer-events: none;
+}
+
+.clinical-soap-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 160px;
+    color: #78909c;
+    text-align: center;
+}
+
+.clinical-soap-placeholder i {
+    font-size: 32px;
+    margin-bottom: 12px;
+    color: #78909c;
+}
+
+.clinical-soap-placeholder p {
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.clinical-soap-content {
+    font-size: 13px;
+    line-height: 1.8;
+    color: #ecf0f1;
+}
+
+.clinical-soap-section {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed #34495e;
+}
+
+.clinical-soap-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.clinical-soap-label {
+    display: inline-block;
+    padding: 2px 8px;
+    background-color: #1a5f7a;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 12px;
+    margin-right: 8px;
+    color: #fff;
+}
+
+.clinical-soap-text {
+    color: #b0bec5;
+}
+
+.clinical-edit-area {
+    padding: 0;
+}
+
+.clinical-edit-fields {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.clinical-edit-field {
+    position: relative;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    padding-left: 28px;
+    border-bottom: 1px solid #34495e;
+}
+
+.clinical-edit-field:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.clinical-edit-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #3498db;
+}
+
+.clinical-edit-label i {
+    font-size: 12px;
+}
+
+.clinical-edit-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 12px;
+    background-color: #2c3e50;
+    border: 1px solid #34495e;
+    border-radius: 6px;
+    color: #ecf0f1;
+    font-size: 13px;
+    line-height: 1.6;
+    resize: vertical;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.clinical-edit-textarea:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.clinical-edit-textarea::placeholder {
+    color: #78909c;
+}
+
+.clinical-disclaimer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 12px;
+    background-color: rgba(231, 76, 60, 0.1);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+    border-radius: 6px;
+    color: #e74c3c;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.clinical-disclaimer i {
+    font-size: 14px;
+}
+
+.clinical-char-count {
+    text-align: right;
+    font-size: 11px;
+    color: #78909c;
+    margin-top: 4px;
+}
+
+.clinical-lis-header {
+    cursor: pointer;
+    user-select: none;
+}
+
+.clinical-lis-header:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.clinical-lis-toggle {
+    margin-left: auto;
+    transition: transform 0.3s ease;
+}
+
+.clinical-lis-header.expanded .clinical-lis-toggle {
+    transform: rotate(180deg);
+}
+
+.clinical-lis-content {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease;
+}
+
+.clinical-lis-content.expanded {
+    max-height: 500px;
+}
+
+.clinical-lis-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background: linear-gradient(135deg, #1a5f7a 0%, #2d8bb5 100%);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clinical-lis-btn:hover {
+    background: linear-gradient(135deg, #2d8bb5 0%, #3498db 100%);
+    transform: translateY(-1px);
+}
+
+.clinical-lis-btn:active {
+    transform: translateY(0);
+}
+
+.clinical-lis-btn.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.clinical-lis-btn.loading i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.clinical-lis-data {
+    margin-top: 12px;
+}
+
+.clinical-lis-section {
+    margin-bottom: 12px;
+}
+
+.clinical-lis-section:last-child {
+    margin-bottom: 0;
+}
+
+.clinical-lis-section-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #3498db;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #34495e;
+}
+
+.clinical-lis-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    margin-bottom: 4px;
+    background-color: #2c3e50;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.clinical-lis-item-name {
+    color: #b0bec5;
+}
+
+.clinical-lis-item-value {
+    font-weight: 600;
+}
+
+.clinical-lis-item-value.normal {
+    color: #27ae60;
+}
+
+.clinical-lis-item-value.abnormal {
+    color: #e74c3c;
+}
+
+.clinical-pacs-item {
+    padding: 10px;
+    margin-bottom: 6px;
+    background-color: #2c3e50;
+    border-radius: 4px;
+    border-left: 3px solid #9b59b6;
+}
+
+.clinical-pacs-item-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #9b59b6;
+    margin-bottom: 4px;
+}
+
+.clinical-pacs-item-content {
+    font-size: 12px;
+    color: #b0bec5;
+    line-height: 1.5;
+}
+
+.clinical-lis-summary {
+    margin-top: 10px;
+    padding: 8px 10px;
+    background-color: rgba(231, 76, 60, 0.1);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+    border-radius: 4px;
+    font-size: 11px;
+    color: #e74c3c;
+}
+
+.clinical-lis-summary i {
+    margin-right: 4px;
+}
+
+.clinical-submit-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #34495e;
+}
+
+.clinical-submit-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+}
+
+.clinical-submit-btn:hover {
+    background: linear-gradient(135deg, #2ecc71 0%, #58d68d 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+}
+
+.clinical-submit-btn:active {
+    transform: translateY(0);
+}
+
+.clinical-submit-btn.submitting {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.clinical-submit-btn.submitting i {
+    animation: spin 1s linear infinite;
+}
+
+.clinical-submit-success {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    color: white;
+    padding: 30px 50px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    z-index: 10000;
+    text-align: center;
+    animation: successPop 0.3s ease;
+}
+
+@keyframes successPop {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+.clinical-submit-success i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.clinical-submit-success h3 {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+}
+
+.clinical-submit-success p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 14px;
+}
+
+.clinical-submit-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+}
+
+.clinical-ai-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.clinical-ai-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clinical-ai-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.clinical-ai-btn-primary {
+    background-color: #3498db;
+    color: white;
+}
+
+.clinical-ai-btn-primary:hover:not(:disabled) {
+    background-color: #2d8bb5;
+}
+
+.clinical-ai-btn-success {
+    background-color: #27ae60;
+    color: white;
+}
+
+.clinical-ai-btn-success:hover:not(:disabled) {
+    background-color: #2ecc71;
+}
+
+.clinical-ai-footer {
+    padding: 12px 20px;
+    background-color: #1e2a38;
+    border-top: 1px solid #34495e;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.clinical-ai-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #78909c;
+}
+
+.clinical-ai-status i {
+    font-size: 8px;
+    color: #27ae60;
+}
+
+.clinical-context-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.clinical-context-btn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #34495e;
+    background: #2c3e50;
+    color: #78909c;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.clinical-context-btn:hover {
+    background: #34495e;
+    color: #3498db;
+    border-color: #3498db;
+}
+
+.clinical-context-btn-danger:hover {
+    background: #c0392b;
+    color: #fff;
+    border-color: #e74c3c;
+}
+
+.clinical-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.clinical-loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 32px 48px;
+    background-color: #1a2535;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.clinical-loading-spinner i {
+    font-size: 32px;
+    color: #3498db;
+}
+
+.clinical-loading-spinner span {
+    font-size: 14px;
+    color: #b0bec5;
+}
