@@ -40,7 +40,8 @@ if (fs.existsSync(demoDir)) {
 
 // 允许跨域请求
 app.all('*', function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", '*');
+    const allowedOrigin = process.env.ALLOWED_ORIGIN || '*'
+    res.header("Access-Control-Allow-Origin", allowedOrigin);
     res.header("Access-Control-Allow-Credentials", "true");
     res.header("Access-Control-Allow-Headers", "*");
     res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
