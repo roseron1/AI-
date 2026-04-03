@@ -668,3 +668,219 @@ export const testLocalStorage = (): { success: boolean; message: string; savedKe
     }
   }
 }
+
+export interface AuditProblem {
+  type: 'consistency' | 'quality' | 'standard' | 'completeness'
+  severity: 'high' | 'medium' | 'low'
+  field?: string
+  description: string
+}
+
+export interface AuditSuggestion {
+  field?: string
+  suggestion: string
+}
+
+export interface AuditResult {
+  score: number
+  problems: AuditProblem[]
+  suggestions: AuditSuggestion[]
+  summary: string
+}
+
+const AUDIT_PROMPT_CONFIG: Record<string, string> = {
+  first_progress: `【首次病程记录质控要点】
+1. 主诉与初步诊断的一致性
+2. 病历分型是否准确（A/B/C型）
+3. 诊疗计划是否完整
+4. 是否包含必要的阴性体征`,
+
+  daily_progress: `【日常病程记录质控要点】
+1. 病情变化描述是否清晰
+2. 治疗措施是否有记录
+3. 辅助检查结果是否分析
+4. 医师签名是否规范`,
+
+  surgery: `【手术记录质控要点】
+1. 手术名称与术前诊断是否匹配
+2. 手术经过描述是否详细
+3. 术中出血量、输血情况是否记录
+4. 标本处理是否说明`,
+
+  discharge: `【出院记录质控要点】
+1. 入院诊断与出院诊断是否一致
+2. 诊疗经过是否完整
+3. 出院医嘱是否详细
+4. 随诊要求是否明确`,
+
+  default: `【通用病历质控要点】
+1. 各项内容是否完整
+2. 时间逻辑是否正确
+3. 医学术语是否规范`
+}
+
+const getAuditSystemPrompt = (docType: string): string => {
+  const specificRules = AUDIT_PROMPT_CONFIG[docType] || AUDIT_PROMPT_CONFIG.default
+  
+  return `你是一位资深病历质控专家，拥有三甲医院病案室20年工作经验。你的职责是严格审核病历质量，确保符合《病历书写基本规范》和三级医院质控标准。
+
+${specificRules}
+
+【核心质控要求】
+
+一、一致性检查
+- 主诉与诊断是否匹配（如主诉"腹痛"而诊断"肺炎"则为不一致）
+- 现病史与主诉是否呼应
+- 诊断与诊疗计划是否对应
+- 时间线是否逻辑正确（入院时间、手术时间、出院时间等）
+
+二、内涵质量检查
+- 是否缺失必要的阴性体征（注意：严禁编造数据，只指出缺失项）
+- 体格检查是否系统完整
+- 辅助检查是否及时分析
+- 诊疗措施是否有依据
+
+三、规范性检查
+- 是否存在口语化描述（如"肚子疼"应为"腹痛"）
+- 医学术语是否规范
+- 格式是否符合要求
+- 签名是否完整
+
+四、完整性检查
+- 必填项是否完整
+- 关键信息是否缺失
+
+【输出要求】
+你必须严格返回以下JSON格式，不要添加任何其他内容：
+{
+  "score": <0-100的质控评分>,
+  "problems": [
+    {
+      "type": "<consistency|quality|standard|completeness>",
+      "severity": "<high|medium|low>",
+      "field": "<涉及字段名>",
+      "description": "<具体问题描述>"
+    }
+  ],
+  "suggestions": [
+    {
+      "field": "<涉及字段名>",
+      "suggestion": "<具体改进建议>"
+    }
+  ],
+  "summary": "<整体评价摘要>"
+}
+
+【重要提醒】
+1. 必须严格返回JSON格式
+2. problems数组列出所有发现的问题
+3. suggestions数组给出针对性改进建议
+4. 评分标准：90分以上优秀，80-89分良好，70-79分合格，70分以下不合格
+5. 发现严重问题（如诊断错误、关键信息缺失）必须标注severity为high`
+}
+
+export const auditMedicalRecord = async (
+  content: string,
+  docType: string = 'daily_progress',
+  config: Partial<LLMConfig> = {}
+): Promise<AuditResult> => {
+  const finalConfig = { ...DEFAULT_CONFIG, ...config }
+  const useBackendProxy = finalConfig.useBackendProxy !== false
+  
+  console.log('[AUDIT] 开始质控，docType:', docType)
+  console.log('[AUDIT] 内容长度:', content.length)
+  
+  const systemPrompt = getAuditSystemPrompt(docType)
+  
+  let response: Response
+  
+  if (useBackendProxy) {
+    console.log('[AUDIT] 使用后端代理 API')
+    response = await fetch('/api/ai/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        provider: 'deepseek',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `请对以下病历内容进行质控审核：\n\n${content}` }
+        ]
+      })
+    })
+  } else {
+    response = await fetch(finalConfig.apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${finalConfig.apiKey}`
+      },
+      body: JSON.stringify({
+        model: finalConfig.model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `请对以下病历内容进行质控审核：\n\n${content}` }
+        ],
+        temperature: 0.1
+      })
+    })
+  }
+  
+  if (!response.ok) {
+    const errorText = await response.text()
+    console.error('[AUDIT] API 响应错误:', response.status, errorText)
+    throw new Error(`质控请求失败：${response.status}`)
+  }
+  
+  const data = await response.json()
+  
+  let aiResponse: any = data
+  
+  if (data.code && data.code !== 10000) {
+    throw new Error(data.message || 'API 返回错误')
+  }
+  
+  if (data.data) {
+    aiResponse = data.data
+  }
+  
+  if (!aiResponse.choices || aiResponse.choices.length === 0) {
+    throw new Error('API 无效响应')
+  }
+  
+  let resultText = aiResponse.choices[0].message.content.trim()
+  console.log('[AUDIT] 原始响应:', resultText.substring(0, 500))
+  
+  resultText = resultText
+    .replace(/```json/gi, '')
+    .replace(/```/g, '')
+    .trim()
+  
+  try {
+    const result: AuditResult = JSON.parse(resultText)
+    console.log('[AUDIT] 质控结果:', JSON.stringify(result, null, 2))
+    
+    if (typeof result.score !== 'number' || !Array.isArray(result.problems)) {
+      throw new Error('质控结果格式不正确')
+    }
+    
+    return result
+  } catch (parseError) {
+    console.error('[AUDIT] JSON 解析失败:', parseError)
+    return {
+      score: 0,
+      problems: [{
+        type: 'standard',
+        severity: 'high',
+        description: '质控结果解析失败，请重试'
+      }],
+      suggestions: [],
+      summary: '质控服务返回格式异常，请稍后重试'
+    }
+  }
+}
+
+export const getAuditPromptConfig = () => {
+  return AUDIT_PROMPT_CONFIG
+}
