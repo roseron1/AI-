@@ -87,6 +87,10 @@
             <i class="fa fa-file-pdf-o"></i>
             <span>导出PDF</span>
           </button>
+          <button class="toolbar-btn quality-control-btn" @click="submitQualityControl" :disabled="isQcLoading">
+            <i :class="isQcLoading ? 'fa fa-spinner fa-spin' : 'fa fa-shield'"></i>
+            <span>{{ isQcLoading ? '质控中...' : '提交质控' }}</span>
+          </button>
         </div>
       </header>
       
@@ -209,6 +213,15 @@
         </section>
       </div>
     </aside>
+
+    <QualityControlPanel
+      :result="qcResult"
+      :is-loading="isQcLoading"
+      :error="qcError"
+      @retry="submitQualityControl"
+      @apply-suggestion="onApplySuggestion"
+      @highlight-field="onHighlightField"
+    />
     
     <div v-if="showUnsavedModal" class="unsaved-modal-overlay" @click.self="cancelClose">
       <div class="unsaved-modal">
@@ -244,7 +257,9 @@
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
 import HmEditor from '../components/HmEditor.vue'
+import QualityControlPanel from '../components/QualityControlPanel.vue'
 import { parsePhysicalExam, isComplexField } from '../utils/emrParser'
+import { auditMedicalRecord, AuditResult } from '../utils/llmService'
 
 interface DocumentItem {
   id: string
@@ -286,6 +301,10 @@ const currentDocId = ref('')
 const isReadOnly = ref(false)
 const isDirty = ref(false)
 const isFocusMode = ref(false)
+
+const isQcLoading = ref(false)
+const qcResult = ref<AuditResult | null>(null)
+const qcError = ref<string | null>(null)
 
 const patientInfo = reactive({
   name: '张三',
@@ -376,6 +395,57 @@ const onEditorError = (error: Error): void => {
 
 const onEditorDestroy = (): void => {
   console.log('[MedicalWorkspace] 编辑器销毁')
+}
+
+const submitQualityControl = async (): Promise<void> => {
+  if (!editorRef.value) {
+    ElMessage.warning('编辑器未初始化')
+    return
+  }
+  
+  const content = editorRef.value.getHtml()
+  if (!content || content.length < 50) {
+    ElMessage.warning('病历内容过少，无法进行质控')
+    return
+  }
+  
+  isQcLoading.value = true
+  qcError.value = null
+  qcResult.value = null
+  
+  try {
+    const docType = currentDocId.value.includes('progress') ? 'daily_progress' : 'discharge'
+    const result = await auditMedicalRecord(content, docType)
+    qcResult.value = result
+    ElMessage.success(`质控完成，评分：${result.score}分`)
+  } catch (error) {
+    console.error('[MedicalWorkspace] 质控失败:', error)
+    qcError.value = error instanceof Error ? error.message : '质控服务异常'
+    ElMessage.error('质控失败，请重试')
+  } finally {
+    isQcLoading.value = false
+  }
+}
+
+const onApplySuggestion = async (suggestion: { field?: string; suggestion: string }): Promise<void> => {
+  if (!editorRef.value) return
+  
+  if (suggestion.field) {
+    const success = await editorRef.value.injectTextToSpecificField(suggestion.field, suggestion.suggestion)
+    if (success) {
+      isDirty.value = true
+      ElMessage.success(`已应用到「${suggestion.field}」`)
+    } else {
+      ElMessage.warning('未找到对应字段')
+    }
+  } else {
+    ElMessage.info('该建议无指定字段，请手动处理')
+  }
+}
+
+const onHighlightField = (fieldName: string): void => {
+  if (!editorRef.value) return
+  editorRef.value.focusField(`[data-hm-name="${fieldName}"]`)
 }
 
 const generateAiContent = async (): Promise<void> => {
@@ -761,6 +831,24 @@ onBeforeUnmount(() => {
 .toolbar-btn:hover {
   background-color: #f8fafc;
   border-color: #cbd5e1;
+}
+
+.toolbar-btn.quality-control-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+  color: white;
+}
+
+.toolbar-btn.quality-control-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.toolbar-btn.quality-control-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .editor-container {
